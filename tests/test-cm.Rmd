@@ -1,0 +1,46 @@
+---
+title: "Fragility of mutualistic communities under gradual environmental pressures"
+author: "feng"
+date: "April 22, 2015"
+output: html_document
+---
+
+This R markdown file tests the fragility of mutualistic ecological communities undergoing gradual (incremental) environmental pressures.
+
+First, we need to initialize the running environment of the simulation
+
+```{r}
+library(perturbEcol)
+library(deSolve)
+library(rootSolve)
+library(plyr)
+library(igraph)
+
+extinct_threshold <- .Machine$double.eps * 100  # threshold of species become extinct
+s = 5  # number of species
+
+# Initialize an object of cmModel
+cm <- new("cmModel")
+cm@times <- 1:200  # time steps
+cm@perturb <- perturb_growthrate  # perturbation function
+cm@perturbNum <- 500  # number of iterated steps
+cm@solver <- sim_ode_press # 
+```
+
+Next, we start from a full mutualistic graph, that means all species cooperate with each other.
+
+```{r, echo=FALSE}
+# mutualistic graph is a full graph
+mutual_graph <- matrix(1, nrow = s, ncol = s)
+#diag(mutual_graph) <- 0 
+# competitive network is a null network
+competitive_graph <- matrix(0, nrow = s, ncol = s)
+coeff <- c(alpha.mu = 0.2, alpha.sd = 0.1, beta0.mu = 1., beta0.sd = 0.1, beta1.mu = 0.0, beta1.sd = 0.0, gamma.mu = 0.01, gamma.sd = 0.0, h.mu = 0.0, h.sd = 0., delta = 0.)
+
+cm@params <- params_lv2_cm(mutual_graph, competitive_graph, coeff)
+cm@init <- init_lv2_cm(cm@params)
+cm <- sim(cm, extinct_threshold = extinct_threshold)
+plot(cm, main = 'mutual, full graph')
+```
+
+We next evaluate the case of hybrid communities. 

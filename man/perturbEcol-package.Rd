@@ -3,23 +3,22 @@
 \alias{perturbEcol}
 \docType{package}
 \title{
-What the package does (short line)
-~~ package title ~~
+perturbEcol: Simulation of ecological dynamic systems under environmental perturbations
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
-}
-\details{
-\tabular{ll}{
-Package: \tab perturbEcol\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2015-04-17\cr
-License: \tab What license is it under?\cr
-}
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
+\strong{perturbEcol} simulates the dynamics of networked ecological systems that undergo environmental perturbations such as climate change etc. 
+
+The simulation model is implemented as S4 class with the following slots:
+  \itemize{
+    \item \code{main = function(time, init, params, ...):} a function holding the main equations of the model, such as ODE, SDE.
+    \item \code{times:} vector of time steps or vector with three named values \code{from, to, by} specifying the simulation time steps.
+    \item \code{init:} initial state (start values) of the simulation. This is a named vector of state variables such as species abundances.
+    \item \code{params:} a list of model parameters whose values would be changed by iterated perturbations.
+    \item \code{perturb = function(params, ...):} a function describing(?) the perturbation or pressure by environments on ecological systems. The results of perturbations are the changing of model parameters.
+    \item \code{perturbNum:} the number of repeated perturbations.
+    \item \code{solver = function(main, times, init, params, perturb, perturbNum, ...):} a function specifying the numerical algorithm of simulation. The algorithms model the dynamics of ecological systems undergoing environmental perturbations.
+    \item \code{out:} the output of simulation.
+  }
 }
 \author{
 Who wrote it
@@ -30,12 +29,8 @@ Maintainer: Who to complain to <yourfault@somewhere.net>
 \references{
 ~~ Literature or other references for background information ~~
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
-~~ the R documentation directory ~~
-\keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+  \code{\link[<pkg>:<pkg>-package]{<perturbEcol>}}
 }
 \examples{
 ~~ simple examples of the most important functions ~~

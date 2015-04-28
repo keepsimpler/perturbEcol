@@ -1,9 +1,23 @@
 Package: perturbEcol
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Simulation of ecological dynamic systems under environmental perturbations
+Version: 0.0.0.9000
 Date: 2015-04-17
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Wenfeng Feng, 
+Maintainer: Wenfeng Feng <fengwenfeng@gmail.com>
+Description: perturbEcol simulates the dynamics of ecological systems under environmental perturbations.
+    The competition, antagonism (predator-prey), mutualism, and their hybrid ecological
+    communities are simulated by dynamic models like Odinary Differential Equations 
+    and Stochastic Differential Equations. Two kinds of environmental perturbations
+    are modeled in the dynamics: continuous pressures and repeated pulses.
+    Species extinction as a special case of perturbation are also modeled. 
+    All perturbations can effect on arbitrary setting of species or their interactions.
+    Several structural features of interaction topology in ecological communities are simulated:
+    scale-free, bipartite, nestedness, modularity, etc.
+Imports: methods,
+    deSolve (>= 1.10-8),
+    simecol (>= 0.8-4),
+    rootSolve (>= 1.6.5),
+    plyr (>= 1.8.1),
+    igraph (>= 0.7.1)
+License: GPL (>= 2)  
