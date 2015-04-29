@@ -11,7 +11,12 @@ fragility <- function(sim.out) {
   fragility.variance = sum(trajectory^2)
   trajectory.positive = trajectory[trajectory > 0]
   fragility.entropy = sum(trajectory.positive * log(trajectory.positive))
-  list(trajectory = trajectory, variance = fragility.variance, entropy = fragility.entropy, resistance = length(sim.out), resistance2 = resistance2)
+
+  trajectory.abund <- laply(sim.out, function(one) {
+    sum(one$nstar)
+  })
+  resistance.abund = sum(trajectory.abund)
+  list(trajectory = trajectory, variance = fragility.variance, entropy = fragility.entropy, resistance = length(sim.out), resistance.abund = resistance.abund, resistance2 = resistance2)
 }
 
 fragility.abund <- function(sim.out) {

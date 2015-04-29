@@ -13,7 +13,7 @@ library(plyr)
 library(igraph)
 
 extinct_threshold <- .Machine$double.eps * 100  # threshold of species become extinct
-s = 30  # number of species
+s = 50  # number of species
 
 # Initialize an object of camModel
 cam <- new("camModel")
@@ -27,7 +27,7 @@ First, we evaluate the special case of all interactions are mutualistic.
 ```{r}
 k = 3
 hybrid_graph = gen_hybrid_network(s, k, type = 'er', pc = 0., pa = 0., pm = 1.0)
-coeff <- c(alpha.mu = 0.2, alpha.sd = 0.1, beta0.mu = 1., beta0.sd = 0.1, beta1.mu = 0.0, beta1.sd = 0.0, antago.mu = 0., antago.sd = 0.0, gamma.mu = 0.3, gamma.sd = 0., h.mu = 0.1, h.sd = 0., g.mu = 0., g.sd = 0., delta = 0.)
+coeff <- c(alpha.mu = 0.2, alpha.sd = 0.1, beta0.mu = 1., beta0.sd = 0.1, beta1.mu = 0.0, beta1.sd = 0.0, antago.mu = 0., antago.sd = 0.0, gamma.mu = 0.1, gamma.sd = 0., h.mu = 0.1, h.sd = 0., g.mu = 0., g.sd = 0., delta = 0.)
 cam@params <- params_lv2_cam(hybrid_graph, coeff)
 cam@init <- init_lv2_cam(cam@params)
 cam <- sim(cam, extinct_threshold = extinct_threshold, r.delta.mu = 0.005, r.delta.sd = 0.00)
