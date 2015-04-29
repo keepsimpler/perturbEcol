@@ -119,7 +119,8 @@ params_mutual_interactions <- function(graph, gamma.mu, gamma.sd, delta) {
   ## !leak!
   M = M / degrees^delta  # trade-off of mutualistic strengths
   new_total_strength = sum(M) # ensure the total strength constant before and after trade-off
-  M = M * old_total_strength / new_total_strength
+  if (new_total_strength != 0)
+    M = M * old_total_strength / new_total_strength
   M = t(M)  ## !leak! ??
   M
 }

@@ -12,8 +12,12 @@ library(rootSolve)
 library(plyr)
 library(igraph)
 
+library(doMC)  # 
+registerDoMC(1)  # register Multi Cores
+getDoParWorkers()  # get available Cores
+
 extinct_threshold <- .Machine$double.eps * 100  # threshold of species become extinct
-s = 50  # number of species
+s = 10  # number of species
 
 # Initialize an object of camModel
 cam <- new("camModel")
@@ -64,7 +68,7 @@ plot(cam, main = 'hybrid, full graph')
 
 gamma.mus = seq(from = 0.1, to = 0.5, by = 0.05)
 gamma.mus = rep(gamma.mus, times = 10)
-ret <- lapply(gamma.mus, function(gamma.mu) {
+ret <- llply(gamma.mus, .parallel = T, function(gamma.mu) {
   coeff['gamma.mu'] = gamma.mu
   coeff['antago.mu'] = gamma.mu
   cam@params <- params_lv2_cam(hybrid_graph, coeff)
@@ -117,7 +121,7 @@ plot(ret2['gamma.mu', ], ret2[c('resistance'), ])
 Next, we add antagonistic interactions
 ```{r}
 k = 3
-hybrid_graph = gen_hybrid_network(s, k, type = 'er', pc = 0., pa = 0.8, pm = 0.2)
+hybrid_graph = gen_hybrid_network(s, k, type = 'er', pc = 0., pa = 1., pm = 0.)
 coeff <- c(alpha.mu = 0.2, alpha.sd = 0.1, beta0.mu = 1., beta0.sd = 0.1, beta1.mu = 0.0, beta1.sd = 0.0, antago.mu = 0.1, antago.sd = 0.0, gamma.mu = 0.1, gamma.sd = 0., h.mu = 0.1, h.sd = 0., g.mu = 1., g.sd = 0., delta = 0.)
 cam@params <- params_lv2_cam(hybrid_graph, coeff)
 cam@init <- init_lv2_cam(cam@params)
