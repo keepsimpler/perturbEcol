@@ -30,7 +30,7 @@ sim_ode_press <- function(model, params, init, times, perturb, perturbNum = 500,
   #times = seq(from = 0, to = steps * stepwise, by = stepwise)
   ode.outs = list()
   for(i in 1:perturbNum) {
-    print(i)
+    #print(i)
     ode.out = ode(init, times, model, params) 
     nstar = as.numeric(ode.out[nrow(ode.out), 2:ncol(ode.out)]) # species biomass at equilibrium
     nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
