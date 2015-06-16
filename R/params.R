@@ -1,4 +1,49 @@
-## accessor and replacement functions for params slot of perturbModel
+## accessor and replacement functions for slots of perturbModel
+setGeneric("main", function(obj, ...) standardGeneric("main"))
+setGeneric("main<-", function(obj, value) standardGeneric("main<-"))
+
+setMethod("main", "perturbModel",
+          function(obj, ...) {obj@main}
+)
+
+setMethod("main<-", "perturbModel", 
+          function(obj, value) {
+            obj@main <- value
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
+setGeneric("times", function(obj, ...) standardGeneric("times"))
+setGeneric("times<-", function(obj, value) standardGeneric("times<-"))
+
+setMethod("times", "perturbModel",
+          function(obj, ...) {obj@times}
+)
+
+setMethod("times<-", "perturbModel", 
+          function(obj, value) {
+            obj@times <- value
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
+setGeneric("init", function(obj, ...) standardGeneric("init"))
+setGeneric("init<-", function(obj, value) standardGeneric("init<-"))
+
+setMethod("init", "perturbModel",
+          function(obj, ...) {obj@init}
+)
+
+setMethod("init<-", "perturbModel", 
+          function(obj, value) {
+            obj@init <- value
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
 setGeneric("params", function(obj, ...) standardGeneric("params"))
 setGeneric("params<-", function(obj, value) standardGeneric("params<-"))
 
@@ -9,10 +54,70 @@ setMethod("params", "perturbModel",
 setMethod("params<-", "perturbModel", 
           function(obj, value) {
             obj@params <- value
-            obj@out <- NULL
+            obj@out <- list()
             invisible(obj)
           }
 )
+
+setGeneric("perturb", function(obj, ...) standardGeneric("perturb"))
+setGeneric("perturb<-", function(obj, value) standardGeneric("perturb<-"))
+
+setMethod("perturb", "perturbModel",
+          function(obj, ...) {obj@perturb}
+)
+
+setMethod("perturb<-", "perturbModel", 
+          function(obj, value) {
+            obj@perturb <- value
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
+setGeneric("perturbNum", function(obj, ...) standardGeneric("perturbNum"))
+setGeneric("perturbNum<-", function(obj, value) standardGeneric("perturbNum<-"))
+
+setMethod("perturbNum", "perturbModel",
+          function(obj, ...) {obj@perturbNum}
+)
+
+setMethod("perturbNum<-", "perturbModel", 
+          function(obj, value) {
+            obj@perturbNum <- value
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
+setGeneric("solver", function(obj, ...) standardGeneric("solver"))
+setGeneric("solver<-", function(obj, value) standardGeneric("solver<-"))
+
+setMethod("solver", "perturbModel",
+          function(obj, ...) {obj@solver}
+)
+
+setMethod("solver<-", "perturbModel", 
+          function(obj, value) {
+            obj@solver <- value
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
+setGeneric("out", function(obj, ...) standardGeneric("out"))
+setGeneric("out<-", function(obj, value) standardGeneric("out<-"))
+
+setMethod("out", "perturbModel",
+          function(obj, ...) {obj@out}
+)
+
+setMethod("out<-", "perturbModel", 
+          function(obj, value) {
+            obj@out <- list()
+            invisible(obj)
+          }
+)
+
 
 #' @title parmaters for hybrid LV2 model according to the network and the coefficients
 #' @param hybrid_graph the hybrid interaction topology of communities, which includes three sub-graphs: competition, antagonism and mutualism

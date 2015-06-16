@@ -3,20 +3,25 @@
 #' @return resistance measured by the length of community trajectory
 #' @return fragility measured by the variance of community trajectory
 fragility <- function(sim.out) {
+  # trajectory of survived species at each step
   trajectory = laply(sim.out, function(one) {
-    length(one$extinct.species)
+    length(one$species.survived)
   })
-  resistance2 = sum(trajectory) # the complement area of the trajectory
-  trajectory = trajectory[-1] - trajectory[-length(trajectory)]
-  fragility.variance = sum(trajectory^2)
-  trajectory.positive = trajectory[trajectory > 0]
+  # the area of the trajectory which reflects the resistance of system
+  resistance.speciesnum = sum(trajectory) 
+  # trajectory of NEW extinct species at each step
+  trajectory.diff = trajectory[-length(trajectory)] - trajectory[-1]
+  fragility.variance = sum(trajectory.diff^2)
+  trajectory.positive = trajectory.diff[trajectory.diff > 0]
   fragility.entropy = sum(trajectory.positive * log(trajectory.positive))
 
+  # add species abunance
   trajectory.abund <- laply(sim.out, function(one) {
     sum(one$nstar)
   })
   resistance.abund = sum(trajectory.abund)
-  list(trajectory = trajectory, variance = fragility.variance, entropy = fragility.entropy, resistance = length(sim.out), resistance.abund = resistance.abund, resistance2 = resistance2)
+  list(trajectory = trajectory, variance = fragility.variance, entropy = fragility.entropy, resistance = length(sim.out), resistance.speciesnum = resistance.speciesnum,
+       resistance.abund = resistance.abund)
 }
 
 fragility.abund <- function(sim.out) {

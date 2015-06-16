@@ -4,7 +4,7 @@
 
 ## root class of perturbed model
 setClass("perturbModel",
-         representation(
+         representation(   # define the slots (variables and functions) of class
            main = "function",
            times     = "numeric",
            init      = "numeric",
@@ -13,24 +13,29 @@ setClass("perturbModel",
            perturbNum= "numeric",
            solver    = "function",
            out       = "ANY"
+         ),
+         prototype(  # initial values of the slots
+           solver = sim_ode_press
          )
 )
 
 ## class of perturbed model for competition and mutualism mixed commnities
 setClass("cmModel",
          representation(
-           out       = "list"
+           out       = "list",
+           fragility = "list"
            ),
-         prototype(
+         prototype(  # initial values of the slots
            main = model_lv2_cm
          ),
-         contains    = "perturbModel"
+         contains    = "perturbModel"  # inherit from super-class
 )
 
 ## class of perturbed model for competition, antagonism and mutualism mixed commnities
 setClass("camModel",
          representation(
-           out       = "list"
+           out       = "list",
+           fragility = "list"
          ),
          prototype(
            main = model_lv2_cam

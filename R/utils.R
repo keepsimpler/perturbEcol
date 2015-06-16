@@ -1,3 +1,19 @@
+#' @title test if an object is null according to its type
+is.empty <- function(obj) {
+  if (is.null(obj)) {
+    return(TRUE)
+  }
+  else if ( (is.numeric(obj) || is.list(obj)) && (length(obj) == 0) ) {
+    return(TRUE)
+  }
+  else if (is.function(obj) && is.null(body(obj))) {
+    return(TRUE)
+  }
+  else {
+    return(FALSE)
+  }
+}
+
 
 #' @title transfer an incidence matrix to an adjacency matrix
 #' @param inc, an incidence matrix
