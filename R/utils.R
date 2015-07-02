@@ -117,6 +117,81 @@ gen_foodweb <- function(s, k, type = 'full') {
   foodweb
 }
 
+#' @title Rewiring one link from mutualism to antagonism
+#' @param A, the antagonism sub-graph
+#' @param M, the mutualism sub-graph
+#' @details pick one mutualism interaction randomly, then split it to two antagonism interactions
+rewire_mutual_to_antago <- function(A, M) {
+  A[A < 0] = 0 # remove negative elements of antagonism sub-graph
+  s = dim(A)[1]  # number of species
+  if (sum(M != 0) > 0) { # if have mutualism interactions to split
+    # pick one mutualism interaction randomly, then split it to two antagonism interactions
+    indx = which(M > 0, arr.ind = T)
+    indx.one = indx[sample(1:nrow(indx), 1), ]
+    # split one mutualism interaction to two antagonism interactions
+    # one is left at the same place, the one is random
+    A[indx.one[1], indx.one[2]] = M[indx.one[1], indx.one[2]]
+    repeat {
+      newlink = sample(1:s, 2)
+      if (A[newlink[1], newlink[2]] == 0 || A[newlink[2], newlink[1]] == 0 || M[newlink[1], newlink[2]] == 0 || M[newlink[2], newlink[1]] == 0) {  # if there is no existed interaction at the place of new link, then move half of mutual interaction to here
+        A[newlink[1], newlink[2]] = M[indx.one[2], indx.one[1]]
+        break
+      }
+    }
+    M[indx.one[1], indx.one[2]] = 0
+    M[indx.one[2], indx.one[1]] = 0
+  }
+  else {
+    warning("No more mutualism interaction available!")
+  }
+  list(A = A, M = M)
+}
+
+#' @title Rewiring one link from antagonism to mutualism
+#' @param A, the antagonism sub-graph
+#' @param M, the mutualism sub-graph
+#' @param need.connected, does the new graph need to be (weakly) connected
+#' @param ntry, number of times to try
+#' @return A M, the antagonism and mutualism sub-graphs after rewiring
+rewire_antago_to_mutual <- function(A, M, need.connected = T, ntry = 100) {
+  A[A < 0] = 0 # remove negative elements of antagonism sub-graph
+  s = dim(A)[1]  # number of species
+  graph <- A + M  # the combined graph
+  graph.bin = graph
+  graph.bin[graph.bin > 0] = 1  # transfer to binary graph
+  if (!is.connected(graph.adjacency(graph.bin, mode = 'directed'), mode = 'weak') && need.connected) {
+    stop("The hybrid graph including both mutualism and antagonism interactions MUST be weakly connected!")
+  }
+  
+  if (sum(A != 0) >= 2) {  # if at least two antagonism interactions available
+    flag = F # is the rewiring succeed
+    for (i in 1:ntry) {
+      # pick two random antagonism interactions, then combine them into one mutualism interaction
+      indx = which(A > 0, arr.ind = T)  # index of links, e.g. (1,2) (3,4)
+      indx.two = indx[sample(1:nrow(indx), 2), ]  # index of two random antagonism interactions
+      graph.tmp = graph.bin
+      graph.tmp[indx.two[2, 1], indx.two[2, 2]] = 0  # imagine the second chosen antagonism interaction is removed from the hybrid graph
+      if (is.connected(graph.adjacency(graph.tmp, mode = 'directed'), mode = 'weak') || !need.connected) {
+        M[indx.two[1, 1], indx.two[1, 2]] = A[indx.two[1, 1], indx.two[1, 2]] # move the first chosen antago interaction to mutual
+        M[indx.two[1, 2], indx.two[1, 1]] = A[indx.two[2, 1], indx.two[2, 2]]  # move the second chosen antago interaction to mutual
+        A[indx.two[1, 1], indx.two[1, 2]] = 0
+        A[indx.two[2, 1], indx.two[2, 2]] = 0
+        flag = T
+        break
+      }
+    }
+    if (flag == F) {
+      warning(paste(ntry, 'times has been tried, but the rewiring still donot succeed.'))
+    }
+    ret = list(A = A, M = M, flag = flag, tried = i)      
+  }
+  else {
+    warning("No enough antagonism interactions available!")
+    ret = list(A = A, M = M, flag = F, tried = 0)
+  }
+  return(ret)
+}
+
 #' @title generate a hybrid network that include competition, antagonism, mutualism interactions
 #' @param s number of species
 #' @param k average degree of species
@@ -140,19 +215,19 @@ gen_hybrid_network <- function(s, k, type = 'er', pc = 0., pa = 0., pm = 1., ...
       if (graph[i, j] == 1) { # if an undirected edge exists between i and j
         cursor = cursor + 1
         p = ps[cursor]
-        if (p < pc) {
+        if (p < pc) {  # competitive sub-graph
           competitive_graph[i, j] = 1
           competitive_graph[j, i] = 1
         }
-        else if (p < pc + pa / 2) {
+        else if (p < pc + pa / 2) { # antagonism sub-graph
           antago_graph[i, j] = 1
           antago_graph[j, i] = - 1
         }
-        else if (p < pc + pa) {
+        else if (p < pc + pa) { # antagonism sub-graph
           antago_graph[i, j] = - 1
           antago_graph[j, i] = 1
         }
-        else if ( p < pc + pa + pm) {
+        else if ( p < pc + pa + pm) { # mutualism sub-graph
           mutual_graph[i, j] = 1
           mutual_graph[j, i] = 1
         }

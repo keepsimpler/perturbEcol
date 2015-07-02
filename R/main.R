@@ -1,7 +1,43 @@
+#####################Consumer-Resource Model##########################
+#' @title A consumer-resource model for mutualism-antagonism hybrid communities
+#' @param time, time steps
+#' @param init, initial state values of the system, a vector
+#' @param params, parameters of the consumer-resource model, a list of:
+#' \describe{
+#'   \item{r}{a vector, the intrinsic growth rates of species}
+#'   \item{C}{a vector, the intraspecies self-regulation of species}
+#'   \item{A}{}
+#'   \item{M}{a matrix, consumer-resource interactions among species}
+#'   \item{H}{a matrix, handling time of consumer species i on resource species j}
+#'   \item{G}{a matrix, conversion rate of resource j to the gain of abundance of species i}
+#'   \item{e}{a vector, conversion rate of some products to the loss of abundance of species i, such as in tree-fungi relations, tree species product carbon which is nutrient of fungi, carbon production may cause the loss of abundance of trees.}
+#' }
+#' @return the derivation of species abundance at current step
+#' @import deSolve
+model_cr <- function(time, init, params, ...) {
+  r = params[[1]]  # intrinsic growth rates
+  C = params[[2]]
+  A = params[[3]]
+  M = params[[4]]  # the consumer-resource interactions
+  H = params[[5]]  # handling time
+  G = params[[6]]  # conversion rate
+  N = init  # initial state values (abundances) of speices
+
+  A[A < 0] = 0  # delete negative links
+  M <- A + M  # combine antagonism and mutualism interactions
+  dN <- N * ( r - C * N  # intraspecies self-regulation
+              + ( (G * M) %*% N ) / (1 + (H * M) %*% N)  # positive part of antagonistic interactions
+              - (t(M) %*% N) / (1 + t(H * M) %*% N)  # negative part of antagonistic interactions
+  )
+  list(c(dN))  
+  
+}
+
+
 #####################Competition-Antagonism-Mutualism##########################
 
 #' @title Lotka-Volterra (LV) Holling type II model for a competition-antagonism-mutualism hybrid community
-#' @param time, time step of simulation
+#' @param time, time steps of simulation
 #' @param init, the initial state of the LV system, a vector
 #' @param params, parameters passed to LV model, a list of:
 #' \describe{

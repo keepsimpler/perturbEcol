@@ -12,7 +12,8 @@ setClass("perturbModel",
            perturb   = "function",
            perturbNum= "numeric",
            solver    = "function",
-           out       = "ANY"
+           out       = "ANY",
+           fragility = "ANY"
          ),
          prototype(  # initial values of the slots
            solver = sim_ode_press
