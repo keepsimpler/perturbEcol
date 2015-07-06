@@ -154,7 +154,7 @@ model_lv2_cm <- function(time, init, params, ...) {
 sim_ode_press <- function(model, params, init, times, perturb, perturbNum = 500, isout = FALSE, extinct_threshold = 1e-10, ...) {
   ode.outs = list()
   for(i in 1:perturbNum) {
-    ode.out = ode(init, times, model, params, atol = 0) 
+    ode.out = ode(init, times, model, params, atol = 1e-14, rtol = 1e-14) 
     nstar = as.numeric(ode.out[nrow(ode.out), 2:ncol(ode.out)]) # species biomass at equilibrium
     nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
     species.survived = which(nstar > 0)  # survived species
