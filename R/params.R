@@ -126,6 +126,46 @@ setMethod("out<-", "perturbModel",
 #'    \item{beta0.mu, beta0.sd}{the intra-species competition coefficients which determin a uniform distribution in [beta.mu - beta.sd, beta.mu + beta.sd]}
 #'    \item{antago.mu, antago.sd}{the inter-species antagonism coefficients}
 #'    \item{h.mu, h.sd}{coefficients of the handling time of species}
+#'    \item{g.mu, g.sd}{conversion efficiency of antagonistic interactions from consumer side}
+#'    \item{e.mu, e.sd}{conversion efficiency of antagonistic interactions from resource side}
+#' }
+#' @return a list of parameters for consumer-resource model:
+#' \describe{
+#'   \item{r}{a vector, the intrinsic growth rates of species}
+#'   \item{C}{a vector, the intraspecies self-regulation of species}
+#'   \item{M}{a matrix, consumer-resource interactions among species}
+#'   \item{H}{a matrix, handling time of consumer species i on resource species j}
+#'   \item{G}{a matrix, conversion rate of resource j to the gain of abundance of species i}
+#'   \item{E}{a matrix, conversion rate of resource j for species i to the lost of abundance of species j}
+#' }
+params_cr2 <- function(hybrid_graph, coeff) {
+  competitive_graph = hybrid_graph$competitive_graph
+  antago_graph = hybrid_graph$antago_graph
+  mutual_graph = hybrid_graph$mutual_graph
+  stopifnot(dim(antago_graph)[1] == dim(antago_graph)[2], dim(competitive_graph)[1] == dim(competitive_graph)[2], dim(antago_graph)[1] == dim(competitive_graph)[1])
+  s = dim(antago_graph)[1]
+  with(as.list(coeff), {
+    r <- runif2(s, alpha.mu, alpha.sd)
+    C <- runif2(s, beta0.mu, beta0.sd) # assign intra-species competitive interaction strengths
+    A <- params_antago_interactions(antago_graph, antago.mu, antago.sd)
+    M <- params_mutual_interactions(mutual_graph, antago.mu, antago.sd, 0)
+    #A[A < 0] = 0  # delete negative links
+    #M <- A + M  # combine antagonism and mutualism interactions
+    H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
+    G = matrix(runif2(s * s, g.mu, g.sd), nrow = s, ncol = s)
+    E = matrix(runif2(s * s, e.mu, e.sd), nrow = s, ncol = s)
+    list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
+  })
+}
+
+#' @title parameters for consumer-resource model according to the hybrid network and the coefficients
+#' @param hybrid_graph the hybrid interaction topology of communities, which includes three sub-graphs: competition, antagonism and mutualism
+#' @param coeff, a list of coefficients:
+#' \describe{
+#'    \item{alpha.mu, alpha.sd}{coefficients of the intrinsic growth rates of species}
+#'    \item{beta0.mu, beta0.sd}{the intra-species competition coefficients which determin a uniform distribution in [beta.mu - beta.sd, beta.mu + beta.sd]}
+#'    \item{antago.mu, antago.sd}{the inter-species antagonism coefficients}
+#'    \item{h.mu, h.sd}{coefficients of the handling time of species}
 #'    \item{g.mu, g.sd}{conversion efficiency of antagonistic interactions}
 #' }
 #' @return a list of parameters for consumer-resource model:

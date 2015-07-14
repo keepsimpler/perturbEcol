@@ -1,4 +1,26 @@
 #####################Consumer-Resource Model##########################
+model_cr2 <- function(time, init, params, ...) {
+  r = params[[1]]  # intrinsic growth rates
+  C = params[[2]]
+  A = params[[3]]
+  M = params[[4]]  # the consumer-resource interactions
+  H = params[[5]]  # handling time
+  G = params[[6]]  # conversion rate of consumer side
+  E = params[[7]]  # conversion rate of resource side
+  N = init  # initial state values (abundances) of speices
+  
+  A[A < 0] = 0  # delete negative links
+  M <- A + M  # combine antagonism and mutualism interactions
+  dN <- N * ( r - C * N  # intraspecies self-regulation
+              + ( (G * M) %*% N ) / (1 + (H * M) %*% N)  # positive part of antagonistic interactions
+              - t(E * M) %*% diag(N) %*% (1 / (1 + (H * M) %*% N))  # negative part of antagonistic interactions
+  )
+  list(c(dN))  
+  
+}
+
+
+#####################Consumer-Resource Model##########################
 #' @title A consumer-resource model for mutualism-antagonism hybrid communities
 #' @param time, time steps
 #' @param init, initial state values of the system, a vector
