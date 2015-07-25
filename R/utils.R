@@ -1,3 +1,4 @@
+
 #' @title test if an object is null according to its type
 is.empty <- function(obj) {
   if (is.null(obj)) {
@@ -36,7 +37,7 @@ inc_to_adj <- function(inc){
 #' if graph type is bipartite, s[1], s[2] represent size of two groups; else s is size of network
 #' @param k, average degree for the network.
 #' 1 < k < s for unipartite network, 1 < k < s[1]*s[2]/(s[1]+s[2]) for bipartite network.
-#' @param gtype, Graph type generated: 'bipartite', 'sf', 'er', 'regular'.
+#' @param gtype, Graph type generated: 'bipartite', 'sf', 'er', 'dag', 'regular'.
 #' @param maxtried, the maximum number of tried times. 
 #' If have tried [maxtried] times, the function will return no matter whether the connected graph is generated.
 #' @param expower exponent coefficient of Scale-Free network
@@ -66,6 +67,10 @@ gen_connected_graph <- function(s, k, gtype, maxtried = 100, expower = 2.5, ...)
     }
     else if (gtype == 'complete') {
       G = graph.full(s)
+    }
+    else if (gtype == 'dag') {
+      require('spacejam')  # generate random directed Acyclic graphs
+      G = rdag(s, s * k * 2)
     }
     if (igraph::is.connected(G)) break  # until a connected graph is generated
     count = count + 1
@@ -236,6 +241,45 @@ gen_hybrid_network <- function(s, k, type = 'er', pc = 0., pa = 0., pm = 1., ...
   }
   list(competitive_graph = competitive_graph, antago_graph = antago_graph, mutual_graph = mutual_graph)
 }
+
+gen_hybrid_network_2 <- function(s, k, type = 'er', pa = 0., pm = 1., ...) {
+  stopifnot(pa >= 0., pm >= 0., pa + pm == 1)
+  edges.mutual = floor(s * k * pm)
+  #edges.antago = sum(graph > 0) / 2 - edges.mutual
+  k = k * (pm + 2 * pa)  # 
+  G = gen_connected_graph(s, k, type, ...)  # generate a connected graph
+  graph = as.matrix(get.adjacency(G))  # transform to matrix form
+  # split the graph to two sub-graphs, antagonism and mutualism graphs, according to the probability of occurance of two different types of interactions
+  antago_graph = matrix(0, nrow = s, ncol = s)
+  mutual_graph = matrix(0, nrow = s, ncol = s)
+  indx = which(lower.tri(graph) & graph > 0, arr.ind = T )
+  tmp = sample(1:nrow(indx), edges.mutual)
+  indx.mutual = indx[tmp, ]
+  if (length(tmp) == 0 | edges.mutual == 0) {
+    indx.antago = indx
+  }
+  else {
+    indx.antago = indx[-tmp, ]    
+  }
+  tmp = sample(1:nrow(indx.antago), nrow(indx.antago) / 2)
+  indx.antago.lower = indx.antago[tmp, ]
+  indx.antago.upper = indx.antago[-tmp, ]
+  mutual_graph = graph
+  mutual_graph[upper.tri(mutual_graph)] = 0
+  mutual_graph[indx.antago] = 0
+  mutual_graph = mutual_graph + t(mutual_graph)
+  antago_graph = graph
+  antago_graph[upper.tri(antago_graph)] = 0
+  antago_graph[indx.mutual] = 0
+  tmp = antago_graph
+  tmp[indx.antago.upper] = 0
+  antago_graph[indx.antago.lower] = 0
+  antago_graph = antago_graph + t(tmp)
+  
+  list(antago_graph = antago_graph, mutual_graph = mutual_graph)
+}
+
+
 #' @title a niche model food web generator according to Williamns and Martinez nature 2000
 #' copy from https://gist.github.com/emhart/1503428
 #' @param s, # of species

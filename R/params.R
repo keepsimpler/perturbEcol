@@ -158,6 +158,53 @@ params_cr2 <- function(hybrid_graph, coeff) {
   })
 }
 
+params_cr2_2 <- function(hybrid_graph, coeff) {
+  antago_graph = hybrid_graph$antago_graph
+  mutual_graph = hybrid_graph$mutual_graph
+  stopifnot(dim(antago_graph)[1] == dim(antago_graph)[2], dim(mutual_graph)[1] == dim(mutual_graph)[2])
+  s = dim(antago_graph)[1]
+  A = antago_graph
+  M = mutual_graph
+  with(as.list(coeff), {
+    r <- runif2(s, alpha.mu, alpha.sd)
+    C <- runif2(s, beta0.mu, beta0.sd) # assign intra-species competitive interaction strengths
+    A[A > 0] = runif2(sum(A > 0), antago.mu, antago.sd)  # assign inter-species antagonism interaction strengths
+    M[M > 0] = runif2(sum(M > 0), antago.mu, antago.sd)  # assign inter-species mutualism interaction strengths
+    H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
+    
+    edges.antago = sum(antago_graph > 0)
+    edges.mutual = sum(mutual_graph > 0)
+    edges.total = edges.antago + edges.mutual
+    
+    g.antago.mu = 0.1
+    g.sd = 0.1
+    if (edges.mutual == 0) {
+      g.mutual.mu = 0
+    }
+    else {
+      g.mutual.mu = (edges.total * g.mu - edges.antago * g.antago.mu) / edges.mutual         
+    }
+    G.mutual = matrix(runif2(s * s, g.mutual.mu, g.mutual.mu * g.sd), nrow = s, ncol = s) * mutual_graph
+    G.antago = matrix(runif2(s * s, g.antago.mu, g.antago.mu * g.sd), nrow = s, ncol = s) * antago_graph
+    G = G.mutual + G.antago
+    
+    e.mutual.mu = 0.1
+    e.sd = 0.1
+    if (edges.antago == 0) {
+      e.antago.mu = 0
+    }
+    else {
+      e.antago.mu = (edges.total * e.mu - edges.mutual * e.mutual.mu) / edges.antago      
+    }
+    E.mutual = matrix(runif2(s * s, e.mutual.mu, e.mutual.mu * e.sd), nrow = s, ncol = s) * mutual_graph
+    E.antago = matrix(runif2(s * s, e.antago.mu, e.antago.mu * e.sd), nrow = s, ncol = s) * antago_graph
+    E = E.mutual + E.antago
+    
+    list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
+  })
+}
+
+
 #' @title parameters for consumer-resource model according to the hybrid network and the coefficients
 #' @param hybrid_graph the hybrid interaction topology of communities, which includes three sub-graphs: competition, antagonism and mutualism
 #' @param coeff, a list of coefficients:
