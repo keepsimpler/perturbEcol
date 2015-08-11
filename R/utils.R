@@ -1,3 +1,23 @@
+#' @title generate uniformly random points within a tringle
+#' @description \deqn{P = (1 - \sqrt{r_1}) A + (\sqrt{r_1} (1 - r_2))  B + (r_2 \sqrt{r_1}) C}
+#'              where \deqn{r_1, r_2 \sim U[0, 1]}
+#' @references http://www.cs.princeton.edu/~funk/tog02.pdf (Section 4.2)
+#' @param tringle, a tringle represented by three points, a 3*2 matrix
+#' @param n, number of uniformly random points 
+#' @examples
+#'  tringle = matrix(c(0, 0, 1, 0, 1, 1), nrow = 3, byrow = T)
+#'  unifTringle(tringle, 10)
+runifTringle <- function(tringle, n) {
+  A = tringle[1, ]
+  B = tringle[2, ]
+  C = tringle[3, ]
+  r1 = runif(n) # uniform in [0, 1]
+  r2 = runif(n) # uniform in [0, 1]
+  P = (1 - r1 ^ 0.5) %*% t(A) + (r1 ^ 0.5 * (1 - r2)) %*% t(B) +
+    (r2 * r1 ^ 0.5) %*% t(C)
+  P
+}
+
 
 #' @title test if an object is null according to its type
 is.empty <- function(obj) {
@@ -242,8 +262,16 @@ gen_hybrid_network <- function(s, k, type = 'er', pc = 0., pa = 0., pm = 1., ...
   list(competitive_graph = competitive_graph, antago_graph = antago_graph, mutual_graph = mutual_graph)
 }
 
+#' @title generate a hybrid network that includes both mutualistic and antagonistic interactions
+#' @param s number of species
+#' @param k average degree of species
+#' @param type network type, 'er':random graph, 'sf':scale-free, 'bipartite':bipartite graph, 'niche':niche model
+#' @param pa probability of antagonism interactions
+#' @param pm probability of mutualism interactions
+#' @param ... additional arguments transformed to graph generate such as [expower]
 gen_hybrid_network_2 <- function(s, k, type = 'er', pa = 0., pm = 1., ...) {
   stopifnot(pa >= 0., pm >= 0., pa + pm == 1)
+  # ONE mutual interaction is splited to TWO antago interactions
   edges.mutual = floor(s * k * pm)
   #edges.antago = sum(graph > 0) / 2 - edges.mutual
   k = k * (pm + 2 * pa)  # 
@@ -252,22 +280,28 @@ gen_hybrid_network_2 <- function(s, k, type = 'er', pa = 0., pm = 1., ...) {
   # split the graph to two sub-graphs, antagonism and mutualism graphs, according to the probability of occurance of two different types of interactions
   antago_graph = matrix(0, nrow = s, ncol = s)
   mutual_graph = matrix(0, nrow = s, ncol = s)
+  # edges indexed by node pairs, for example (1, 2)
   indx = which(lower.tri(graph) & graph > 0, arr.ind = T )
+  # randomly chose mutual edges from edges
   tmp = sample(1:nrow(indx), edges.mutual)
   indx.mutual = indx[tmp, ]
+  # the other edges are antago- edges
   if (length(tmp) == 0 | edges.mutual == 0) {
     indx.antago = indx
   }
   else {
     indx.antago = indx[-tmp, ]    
   }
+  # the antago- edges should further be partitioned by direction
   tmp = sample(1:nrow(indx.antago), nrow(indx.antago) / 2)
   indx.antago.lower = indx.antago[tmp, ]
   indx.antago.upper = indx.antago[-tmp, ]
+  # extract mutual- partition
   mutual_graph = graph
   mutual_graph[upper.tri(mutual_graph)] = 0
   mutual_graph[indx.antago] = 0
   mutual_graph = mutual_graph + t(mutual_graph)
+  # generate antago- partition
   antago_graph = graph
   antago_graph[upper.tri(antago_graph)] = 0
   antago_graph[indx.mutual] = 0
