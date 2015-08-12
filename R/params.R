@@ -188,8 +188,8 @@ params_cr2_3 <- function(hybrid_graph, coeff) {
       rho.mutual = - rho.mutual
       tringle1 = matrix(c(0, 0, 1, 1 - rho.mutual, 1, 1), nrow = 3, byrow = T)
       tringle2 = matrix(c(0, 0, rho.mutual, 0, 1, 1 - rho.mutual), nrow = 3, byrow = T)
-      P1 = runifTringle(tringle1, s * s / (1 + 1 - rho.mutual))
-      P2 = runifTringle(tringle2, s * s * (1 - rho.mutual) / (1 + 1 - rho.mutual))
+      P1 = runifTringle(tringle1, floor(s * s / (1 + 1 - rho.mutual)))
+      P2 = runifTringle(tringle2, s * s - floor(s * s / (1 + 1 - rho.mutual)))
       P = rbind(P1, P2)
       stopifnot(nrow(P) == s * s)
     } else {
