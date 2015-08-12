@@ -15,6 +15,7 @@ runifTringle <- function(tringle, n) {
   r2 = runif(n) # uniform in [0, 1]
   P = (1 - r1 ^ 0.5) %*% t(A) + (r1 ^ 0.5 * (1 - r2)) %*% t(B) +
     (r2 * r1 ^ 0.5) %*% t(C)
+  colnames(P) <- c('x', 'y')
   P
 }
 

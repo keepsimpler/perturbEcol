@@ -158,6 +158,67 @@ params_cr2 <- function(hybrid_graph, coeff) {
   })
 }
 
+params_cr2_3 <- function(hybrid_graph, coeff) {
+  antago_graph = hybrid_graph$antago_graph
+  mutual_graph = hybrid_graph$mutual_graph
+  stopifnot(dim(antago_graph)[1] == dim(antago_graph)[2], dim(mutual_graph)[1] == dim(mutual_graph)[2])
+  s = dim(antago_graph)[1]
+  A = antago_graph
+  M = mutual_graph
+  with(as.list(coeff), {
+    r <- runif2(s, alpha.mu, alpha.sd)
+    C <- runif2(s, beta0.mu, beta0.sd) # assign intra-species competitive interaction strengths
+    A[A > 0] = runif2(sum(A > 0), antago.mu, antago.sd)  # assign inter-species antagonism interaction strengths
+    # mutual- interaction strengths are symmetric
+    tmp = matrix(rep(0, s * s), nrow = s)
+    tmp[upper.tri(tmp)] = runif2(s * (s - 1) / 2, antago.mu, antago.sd)
+    tmp = tmp + t(tmp)
+    M = tmp * mutual_graph
+    
+    H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
+    
+    # assign consumer-side conversion rates ([g]) and
+    # resource-side conversion rates ([e]) to
+    # mutual- interactions
+    # for mutual- interactions, 1 >= [g] > [e] >0
+    # so we need to generate uniform random points in a tringle:
+    # A--(0,0)  B--(1,0)  C--(1,1) for ([g],[e])
+    # tringle = matrix(c(0, 0, 1, 0, 1, 1), nrow = 3, byrow = T)
+    if (rho.mutual < 0) {
+      rho.mutual = - rho.mutual
+      tringle1 = matrix(c(0, 0, 1, 1 - rho.mutual, 1, 1), nrow = 3, byrow = T)
+      tringle2 = matrix(c(0, 0, rho.mutual, 0, 1, 1 - rho.mutual), nrow = 3, byrow = T)
+      P1 = runifTringle(tringle1, s * s / (1 + 1 - rho.mutual))
+      P2 = runifTringle(tringle2, s * s * (1 - rho.mutual) / (1 + 1 - rho.mutual))
+      P = rbind(P1, P2)
+      stopifnot(nrow(P) == s * s)
+    } else {
+      tringle = matrix(c(rho.mutual, 0, 1, 0, 1, 1 - rho.mutual), nrow = 3, byrow = T)
+      P = runifTringle(tringle, s * s)
+    }
+    G.mutual = matrix(P[, 1], ncol = s)
+    E.mutual = matrix(P[, 2], ncol = s)
+    #E.mutual = t(E.mutual) # trick with t(E * M) in model_cr2
+    G.mutual = G.mutual * mutual_graph
+    E.mutual = E.mutual * mutual_graph
+    
+    # assign [g] and [e] to antago- interactions
+    # for antago- interactions, 1 > [g] > 0, [e] = 1
+    E.antago = antago_graph
+    if (rho.antago < 0) {
+      rho.antago = - rho.antago
+      G.antago = matrix(runif(s * s, min = 1 - rho.antago, max = 1), ncol = s) * antago_graph
+    } else {
+      G.antago = matrix(runif(s * s, min = 0, max = rho.antago), ncol = s) * antago_graph
+    }
+    
+    E = E.mutual + E.antago
+    G = G.mutual + G.antago
+    
+    list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
+  })
+}
+
 params_cr2_2 <- function(hybrid_graph, coeff) {
   antago_graph = hybrid_graph$antago_graph
   mutual_graph = hybrid_graph$mutual_graph
