@@ -158,6 +158,29 @@ params_cr2 <- function(hybrid_graph, coeff) {
   })
 }
 
+params_cr2_4 <- function(hybrid_graph, coeff) {
+  mutual_graph = hybrid_graph$mutual_graph
+  s = dim(mutual_graph)[1]
+  with(as.list(coeff), {
+    r <- runif2(s, alpha.mu, alpha.sd)
+    C <- runif2(s, beta0.mu, beta0.sd) # assign intra-species competitive interaction strengths
+    
+    # mutual- interaction strengths are symmetric
+    tmp = matrix(rep(0, s * s), nrow = s)
+    tmp[upper.tri(tmp)] = runif2(s * (s - 1) / 2, antago.mu, antago.sd)
+    tmp = tmp + t(tmp)
+    M = tmp * mutual_graph
+    
+    A = matrix(0, nrow = s, ncol = s)
+
+    H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
+    
+    G = matrix(runif(s * s, 0, 1), nrow = s, ncol = s) * mutual_graph
+    E = matrix(runif(s * s, 0, 1), nrow = s, ncol = s) * mutual_graph
+    
+    list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
+  })
+}
 params_cr2_3 <- function(hybrid_graph, coeff) {
   antago_graph = hybrid_graph$antago_graph
   mutual_graph = hybrid_graph$mutual_graph
