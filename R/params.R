@@ -176,9 +176,12 @@ params_cr2_4 <- function(hybrid_graph, coeff) {
     H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
     
     shapes = betaShapes(mean1, var1, mean2, var2)
-    X = rBivarBetas(s * s, shapes['alpha1'], shapes['beta1'], shapes['alpha2'], shapes['beta2'], rho = rho)
-    G = matrix(X[, 1], nrow = s, ncol = s) * mutual_graph
-    E = matrix(X[, 2], nrow = s, ncol = s) * mutual_graph
+    edges = sum(mutual_graph > 0)
+    X = rBivarBetas(edges, shapes['alpha1'], shapes['beta1'], shapes['alpha2'], shapes['beta2'], rho = rho)
+    G = mutual_graph
+    G[G > 0] = X[, 1]
+    E = mutual_graph
+    E[E > 0] = X[, 2]
     
     list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
   })
