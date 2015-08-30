@@ -175,8 +175,10 @@ params_cr2_4 <- function(hybrid_graph, coeff) {
 
     H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
     
-    G = matrix(runif(s * s, 0, 1), nrow = s, ncol = s) * mutual_graph
-    E = matrix(runif(s * s, 0, 1), nrow = s, ncol = s) * mutual_graph
+    shapes = betaShapes(mean1, var1, mean2, var2)
+    X = rBivarBetas(s * s, shapes['alpha1'], shapes['beta1'], shapes['alpha2'], shapes['beta2'], rho = rho)
+    G = matrix(X[, 1], nrow = s, ncol = s) * mutual_graph
+    E = matrix(X[, 2], nrow = s, ncol = s) * mutual_graph
     
     list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
   })
@@ -208,7 +210,7 @@ params_cr2_3 <- function(hybrid_graph, coeff) {
     # A--(0,0)  B--(1,0)  C--(1,1) for ([g],[e])
     # tringle = matrix(c(0, 0, 1, 0, 1, 1), nrow = 3, byrow = T)
     if (rho.mutual < 0) {
-      rho.mutual = - rho.mutual
+      rho.mutual = 1 + rho.mutual
       tringle1 = matrix(c(0, 0, 1, 1 - rho.mutual, 1, 1), nrow = 3, byrow = T)
       tringle2 = matrix(c(0, 0, rho.mutual, 0, 1, 1 - rho.mutual), nrow = 3, byrow = T)
       P1 = runifTringle(tringle1, floor(s * s / (1 + 1 - rho.mutual)))

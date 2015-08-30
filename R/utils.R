@@ -1,3 +1,36 @@
+# http://www.evanmiller.org/bayesian-ab-testing.html#cite1   Probability of one Beta variable is charger than another
+#' @title generate two correlated Beta random variables
+#' @param n, number of samples
+#' @param mean1, var1, mean2, var2
+#' @param rho, correlation coefficient
+#' 
+rBivarBetas <- function(n, alpha1, beta1, alpha2, beta2, rho) {
+  # simulate bivariate normal data with the specified correlation
+  require(MASS) # use [mvnorm] function
+  Z = mvrnorm(n, c(0, 0), matrix(c(1, rho, rho, 1), 2, 2), empirical = T) # empirical: samples or population
+  # transform the normal variates into uniform variates
+  U = apply(Z, 2, pnorm)
+  X1 = qbeta(U[,1], alpha1, beta1)
+  X2 = qbeta(U[,2], alpha2, beta2)
+  X = cbind(X1, X2)
+  X
+}
+
+#' @title calculate shape parameters alpha and beta from means and variances
+#' @param mean1, var1, mean2, var2
+#' @return a list of (alpha1, beta1, alpha2, beta2)
+betaShapes <- function(mean1, var1, mean2, var2) {
+  stopifnot(mean1 > 0 & mean1 < 1 & mean2 > 0 & mean2 < 1 &
+              var1 > 0 & var1 <= mean1 * (1 - mean1) &
+              var2 > 0 & var2 <= mean2 * (1 - mean2))
+  alpha1 = (mean1 * (1 - mean1) / var1 - 1) * mean1
+  alpha2 = (mean2 * (1 - mean2) / var2 - 1) * mean2
+  beta1 = alpha1 * (1 / mean1 - 1)
+  beta2 = alpha2 * (1 / mean2 - 1)
+  c(alpha1 = alpha1, beta1 = beta1, alpha2 = alpha2, beta2 = beta2)
+}
+
+
 #' @title generate uniformly random points within a tringle
 #' @description \deqn{P = (1 - \sqrt{r_1}) A + (\sqrt{r_1} (1 - r_2))  B + (r_2 \sqrt{r_1}) C}
 #'              where \deqn{r_1, r_2 \sim U[0, 1]}
