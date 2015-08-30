@@ -6,7 +6,7 @@
 #' 
 rBivarBetas <- function(n, alpha1, beta1, alpha2, beta2, rho) {
   # simulate bivariate normal data with the specified correlation
-  require(MASS) # use [mvnorm] function
+  #require(MASS) # use [mvnorm] function
   Z = mvrnorm(n, c(0, 0), matrix(c(1, rho, rho, 1), 2, 2), empirical = T) # empirical: samples or population
   # transform the normal variates into uniform variates
   U = apply(Z, 2, pnorm)
