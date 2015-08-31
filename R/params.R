@@ -258,7 +258,12 @@ params_cr2_2 <- function(hybrid_graph, coeff) {
     r <- runif2(s, alpha.mu, alpha.sd)
     C <- runif2(s, beta0.mu, beta0.sd) # assign intra-species competitive interaction strengths
     A[A > 0] = runif2(sum(A > 0), antago.mu, antago.sd)  # assign inter-species antagonism interaction strengths
-    M[M > 0] = runif2(sum(M > 0), antago.mu, antago.sd)  # assign inter-species mutualism interaction strengths
+    # mutual- interaction strengths are symmetric
+    tmp = matrix(rep(0, s * s), nrow = s)
+    tmp[upper.tri(tmp)] = runif2(s * (s - 1) / 2, antago.mu, antago.sd)
+    tmp = tmp + t(tmp)
+    M = tmp * mutual_graph
+
     H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
     
     # number of mutual- and antago- edges
@@ -269,35 +274,22 @@ params_cr2_2 <- function(hybrid_graph, coeff) {
     # assign consumer-side conversion rates of interactions. 
     # [g] is divided according to interaction types (antago- or mutual-).
     # for antago- interactions, the consumer-side conversion rates is argued to be very small, we fix it to be 0.1 mean and 0.1 relative sd.
-    g.antago.mu = 0.1
-    g.sd = 0.1
+    #g.antago.mu = 0.1
+    #g.sd = 0.1
     # the mean of consumer-side conversion rates for mutual- interactions is assigned under the constraint(restriction) that keeping the mean of consumer-side conversion rates for all interactions constant
-    if (edges.mutual == 0) {
-      g.mutual.mu = 0
-    }
-    else {
-      g.mutual.mu = (edges.total * g.mu - edges.antago * g.antago.mu) / edges.mutual         
-    }
-    if (g.mutual.mu <= 0) return(list())
-    G.mutual = matrix(runif2(s * s, g.mutual.mu, g.mutual.mu * g.sd), nrow = s, ncol = s) * mutual_graph
-    G.antago = matrix(runif2(s * s, g.antago.mu, g.antago.mu * g.sd), nrow = s, ncol = s) * antago_graph
+    G.mutual = matrix(runif2(s * s, g.mu, g.sd), nrow = s, ncol = s) * mutual_graph
+    G.antago = matrix(runif2(s * s, g.mu, g.sd), nrow = s, ncol = s) * antago_graph
     G = G.mutual + G.antago
     
     # assign resource-side conversion rates of interactions. 
     # [e] is divided according to interaction types (antago- or mutual-).
     # for antago- interactions, the resource-side conversion rates is argued to be 1.0.
-    e.entago.mu = 1.
-    e.sd = 0.1
-    if (edges.mutual == 0) {
-      e.mutual.mu = 0
-    }
-    else {
-      e.mutual.mu = (edges.total * e.mu - edges.antago * e.antago.mu) / edges.mutual         
-    }
-    # if the resource-side conversion rates of mutual- interactions is 0, then fail
-    if (e.mutual.mu <= 0) return(list())
-    E.mutual = matrix(runif2(s * s, e.mutual.mu, e.mutual.mu * e.sd), nrow = s, ncol = s) * mutual_graph
-    E.antago = matrix(runif2(s * s, e.antago.mu, e.antago.mu * 0), nrow = s, ncol = s) * antago_graph
+    #e.entago.mu = 1.
+    #e.sd = 0.1
+    e.mu.mutual = (e.mu * edges.total - 1 * edges.antago) / edges.mutual
+    if (e.mu.mutual < 0) e.mu.mutual = 0
+    E.mutual = matrix(runif2(s * s, e.mu.mutual, 0), nrow = s, ncol = s) * mutual_graph
+    E.antago = matrix(runif2(s * s, 1, 0), nrow = s, ncol = s) * antago_graph
     E = E.mutual + E.antago
     
     list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
