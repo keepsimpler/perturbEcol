@@ -232,13 +232,31 @@ params_cr2_3 <- function(hybrid_graph, coeff) {
     
     # assign [g] and [e] to antago- interactions
     # for antago- interactions, 1 > [g] > 0, [e] = 1
-    E.antago = antago_graph
+    #E.antago = antago_graph
+    #if (rho.antago < 0) {
+    #  rho.antago = - rho.antago
+    #  G.antago = matrix(runif(s * s, min = 1 - rho.antago, max = 1), ncol = s) * antago_graph
+    #} else {
+    #  G.antago = matrix(runif(s * s, min = 0, max = rho.antago), ncol = s) * antago_graph
+    #}
+    # switch [g] and [e] for antago-
     if (rho.antago < 0) {
-      rho.antago = - rho.antago
-      G.antago = matrix(runif(s * s, min = 1 - rho.antago, max = 1), ncol = s) * antago_graph
+      rho.antago = 1 + rho.antago
+      tringle1 = matrix(c(0, 0, 1, 1 - rho.antago, 1, 1), nrow = 3, byrow = T)
+      tringle2 = matrix(c(0, 0, rho.antago, 0, 1, 1 - rho.antago), nrow = 3, byrow = T)
+      P1 = runifTringle(tringle1, floor(s * s / (1 + 1 - rho.antago)))
+      P2 = runifTringle(tringle2, s * s - floor(s * s / (1 + 1 - rho.antago)))
+      P = rbind(P1, P2)
+      stopifnot(nrow(P) == s * s)
     } else {
-      G.antago = matrix(runif(s * s, min = 0, max = rho.antago), ncol = s) * antago_graph
+      tringle = matrix(c(rho.antago, 0, 1, 0, 1, 1 - rho.antago), nrow = 3, byrow = T)
+      P = runifTringle(tringle, s * s)
     }
+    G.antago = matrix(P[, 2], ncol = s)
+    E.antago = matrix(P[, 1], ncol = s)
+    #E.mutual = t(E.mutual) # trick with t(E * M) in model_cr2
+    G.antago = G.antago * antago_graph
+    E.antago = E.antago * antago_graph
     
     E = E.mutual + E.antago
     G = G.mutual + G.antago
