@@ -158,6 +158,7 @@ params_cr2 <- function(hybrid_graph, coeff) {
   })
 }
 
+#' @title Beta distribution of conversion rates
 params_cr2_4 <- function(hybrid_graph, coeff) {
   mutual_graph = hybrid_graph$mutual_graph
   s = dim(mutual_graph)[1]
@@ -186,6 +187,35 @@ params_cr2_4 <- function(hybrid_graph, coeff) {
     list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
   })
 }
+#' @title triangle distribution of conversion rates for antago- and mutual- interactions
+params_cr2_5 <- function(hybrid_graph, coeff) {
+  antago_graph = hybrid_graph$antago_graph
+  mutual_graph = hybrid_graph$mutual_graph
+  stopifnot(dim(antago_graph)[1] == dim(antago_graph)[2], dim(mutual_graph)[1] == dim(mutual_graph)[2])
+  s = dim(antago_graph)[1]
+  A = antago_graph
+  M = mutual_graph
+  with(as.list(coeff), {
+    r <- runif2(s, alpha.mu, alpha.sd)
+    C <- runif2(s, beta0.mu, beta0.sd) # assign intra-species competitive interaction strengths
+    A[A > 0] = runif2(sum(A > 0), antago.mu, antago.sd)  # assign inter-species antagonism interaction strengths
+    # mutual- interaction strengths are symmetric
+    tmp = matrix(rep(0, s * s), nrow = s)
+    tmp[upper.tri(tmp)] = runif2(s * (s - 1) / 2, antago.mu, antago.sd)
+    tmp = tmp + t(tmp)
+    M = tmp * mutual_graph
+    
+    H = matrix(runif2(s * s, h.mu, h.sd), nrow = s, ncol = s)
+    
+    G = g.mutual.mean * mutual_graph + g.antago.mean * antago_graph
+    E = e.mutual.mean * mutual_graph + e.antago.mean * antago_graph
+    
+    list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
+  })
+}
+
+    
+#' @title triangle distribution of conversion rates for antago- and mutual- interactions
 params_cr2_3 <- function(hybrid_graph, coeff) {
   antago_graph = hybrid_graph$antago_graph
   mutual_graph = hybrid_graph$mutual_graph
