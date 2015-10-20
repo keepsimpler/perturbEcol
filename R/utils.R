@@ -114,7 +114,7 @@ gen_connected_graph <- function(s, k, gtype, maxtried = 100, expower = 2.5, ...)
       G = static.power.law.game(s, k * s, exponent.out = expower)
     }
     else if (gtype == 'er') {
-      G = erdos.renyi.game(s, p.or.m = k * s, type = 'gnm')
+      G = sample_gnm(s, k * s)
     }
     else if (gtype == 'regular') {
       G = k.regular.game(s, k)
@@ -317,7 +317,7 @@ gen_hybrid_network_2 <- function(s, k, type = 'er', pa = 0., pm = 1., ...) {
   # edges indexed by node pairs, for example (1, 2)
   indx = which(lower.tri(graph) & graph > 0, arr.ind = T )
   # randomly chose mutual edges from edges
-  tmp = sample(1:nrow(indx), edges.mutual)
+  tmp = sample(1:nrow(indx), as.numeric(edges.mutual))
   indx.mutual = indx[tmp, ]
   # the other edges are antago- edges
   if (length(tmp) == 0 | edges.mutual == 0) {

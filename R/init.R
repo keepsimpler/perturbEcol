@@ -6,7 +6,7 @@ init_cr2 <- function(params) {
   init = solve(diag(params$C) - params$G * (params$A + params$M) + t(params$E * (params$A + params$M))) %*% params$r
   if (any(init < 0)) {
     warning('Initial state values is less than 0 !!')
-    init = params$r
+    init = abs(params$r)
   }
   c(init)  
 }

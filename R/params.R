@@ -187,7 +187,7 @@ params_cr2_4 <- function(hybrid_graph, coeff) {
     list(r = r, C = C, A = A, M = M, H = H, G = G, E = E)     
   })
 }
-#' @title triangle distribution of conversion rates for antago- and mutual- interactions
+#' @title Mean-field case of conversion rates for antago- and mutual- interactions
 params_cr2_5 <- function(hybrid_graph, coeff) {
   antago_graph = hybrid_graph$antago_graph
   mutual_graph = hybrid_graph$mutual_graph

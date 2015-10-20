@@ -9,8 +9,8 @@ setMethod("plot", c("perturbModel", "missing"),
               one$nstar
             })
             par(mfrow=c(2,1)) 
-            matplot(ode.nstars, type = 'l', lwd = 1., xlab = 'Steps of gradual pressures', ylab = 'Abundances of species', ...)
-            matplot(fragility$trajectory, type = 'l', lwd = 1., col = c(3), xlab = 'Steps of gradual pressures', ylab = 'Number of survived species', ...)
+            matplot(ode.nstars, type = 'l', lwd = 1., xlab = 'Steps of gradual pressure', ylab = 'Abundances of species', ...)
+            matplot(fragility$trajectory, type = 'l', lwd = 1., col = c(3), xlab = 'Steps of gradual pressure', ylab = 'Number of survived species', ...)
             
           }
 )
