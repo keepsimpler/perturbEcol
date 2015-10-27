@@ -212,36 +212,22 @@ rootfun <- function(time, init, params) {
   return(sum(abs(dstate)) - 1e-10) 
 }
 
-sim_ode <- function(model, params, init, times, isout = FALSE, extinct_threshold = 1e-10, ...) {
-  out = ode(init, times, model, params, rootfun = rootfun, method = "lsodar") 
-  nstar =  out[, 3]# species biomass at equilibrium
+sim_ode <- function(model, params, init, time, extinct_threshold = 1e-10, ...) {
+  out = ode(init, time, model, params, rootfun = rootfun, method = "lsodar") 
+  nstar =  as.numeric(out[nrow(out), 2:ncol(out)]) # species abundances in equilibrium
   nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
   species.survived = which(nstar > 0)  # survived species
+  time.steps =  out[nrow(out), 1]
   
-  flag = 0
+  #flag = 0
   # if all species are extinct, will end the simulation
-  if (length(species.survived) == 0) flag = 1
+  #if (length(species.survived) == 0) flag = 1
   # if any species' abundance is NaN, that means the ODE dynamic is unstable, the simulation will also be ended
-  if (any(is.nan(nstar))) flag = 2
+  #if (any(is.nan(nstar))) flag = 2
   
   Phi = jacobian.full(y = nstar, func = model, params = params) # community matrix, Jacobian matrix at equilibrium
-  if (isout) {
-    ret = list(out = ode.out, nstar = nstar, Phi = Phi, params = params, species.survived = species.survived, flag = flag)
-  }
-  else {
-    ret = list(nstar = nstar, Phi = Phi, params = params, species.survived = species.survived, flag = flag)
-  }
-  ode.outs[[length(ode.outs) + 1]] = ret
-  # if all species are extinct, end the simulation
-  if (flag == 1 || flag == 2)
-    break;
-  
-  # perturbation that returns new parameters and initial values
-  perturb.ret = perturb(params, nstar, ...)
-  params = perturb.ret$params
-  init = perturb.ret$nstar
-
-    return(ode.outs)
+  ret = list(nstar = nstar, Phi = Phi, params = params, species.survived = species.survived, time.steps = time.steps)
+  return(ret)
 }
 
 
