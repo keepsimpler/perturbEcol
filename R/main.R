@@ -209,7 +209,7 @@ sim_ode_press <- function(model, params, init, times, perturb, perturbNum = 500,
 
 rootfun <- function(time, init, params) {
   dstate <- unlist(model_cr2(time, init, params))
-  return(sum(abs(dstate)) - 1e-10) 
+  return(sum(abs(dstate)) - 1e-13) 
 }
 
 sim_ode <- function(model, params, init, time, extinct_threshold = 1e-10, ...) {
