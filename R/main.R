@@ -213,7 +213,7 @@ rootfun <- function(time, init, params) {
 }
 
 sim_ode <- function(model, params, init, time, extinct_threshold = 1e-10, ...) {
-  out = ode(init, time, model, params, rootfun = rootfun, method = "lsodar", atol = 0) 
+  out = ode(init, time, model, params, rootfun = rootfun, method = "lsodar", atol = 1e-10) 
   nstar =  as.numeric(out[nrow(out), 2:ncol(out)]) # species abundances in equilibrium
   nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
   species.survived = which(nstar > 0)  # survived species
