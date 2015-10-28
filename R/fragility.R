@@ -17,6 +17,7 @@ fragility <- function(sim.out) {
 
   # trajectory of total abundance of survived species at each step
   trajectory.abund <- laply(sim.out, function(one) {
+    one$nstar[!complete.cases(one$nstar)] = 0
     sum(one$nstar)
   })
   # the sum of total abundance of survived species at every step
