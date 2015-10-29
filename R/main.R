@@ -176,7 +176,7 @@ model_lv2_cm <- function(time, init, params, ...) {
 sim_ode_press <- function(model, params, init, times, perturb, perturbNum = 500, isout = FALSE, extinct_threshold = 1e-10, ...) {
   ode.outs = list()
   for(i in 1:perturbNum) {
-    ode.out = ode(init, times, model, params, rootfun = rootfun, method = "lsodar", atol = 1e-10) # method = "ode45", atol = 1e-14, rtol = 1e-14 
+    ode.out = ode(init, times, model, params, method = "ode45", atol = 1e-14, rtol = 1e-14) # rootfun = rootfun, method = "lsodar", atol = 1e-10 
     nstar = as.numeric(ode.out[nrow(ode.out), 2:ncol(ode.out)]) # species biomass at equilibrium
     nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
     species.survived = which(nstar > 0)  # survived species
@@ -213,7 +213,7 @@ rootfun <- function(time, init, params) {
 }
 
 sim_ode <- function(model, params, init, time, extinct_threshold = 1e-10, ...) {
-  out = ode(init, time, model, params, rootfun = rootfun, method = "lsodar", atol = 1e-10) 
+  out = ode(init, time, model, params, method = "ode45", atol = 1e-14, rtol = 1e-14) # rootfun = rootfun, method = "lsodar", atol = 1e-10
   nstar =  as.numeric(out[nrow(out), 2:ncol(out)]) # species abundances in equilibrium
   nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
   species.survived = which(nstar > 0)  # survived species
@@ -226,7 +226,7 @@ sim_ode <- function(model, params, init, time, extinct_threshold = 1e-10, ...) {
   #if (any(is.nan(nstar))) flag = 2
   
   Phi = jacobian.full(y = nstar, func = model, params = params) # community matrix, Jacobian matrix at equilibrium
-  ret = list(nstar = nstar, Phi = Phi, params = params, species.survived = species.survived, time.steps = time.steps)
+  ret = list(out = out, nstar = nstar, Phi = Phi, params = params, species.survived = species.survived, time.steps = time.steps)
   return(ret)
 }
 
