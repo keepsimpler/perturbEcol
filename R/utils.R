@@ -1,3 +1,82 @@
+#' @title generate polygon distribution in rectangle [(0,0), (1,1)]
+#' @param rho, control sample subspace in rectangle [(0,0), (1,1)]
+#' @param n, number of random variables
+polygon_distribution <- function(rho, n) {
+  if (rho < 0) {
+    rho = - rho
+    tringle1 = matrix(c(0, 0, 1, 0, 1, 1), nrow = 3, byrow = T)
+    tringle2 = matrix(c(0, 0, 1, 1, 1 - rho, 1), nrow = 3, byrow = T)
+    tringle3 = matrix(c(0, 0, 1 - rho, 1, 0, rho), nrow = 3, byrow = T)
+    P1 = runifTringle(tringle1, floor(n / (1 + rho + rho * (1 - rho))))
+    P2 = runifTringle(tringle2, floor(rho * n / (1 + rho + rho * (1 - rho))))
+    P3 = runifTringle(tringle3, n - floor(n / (1 + rho + rho * (1 - rho))) -
+                        floor(rho * n / (1 + rho + rho * (1 - rho))) )
+    P = rbind(P1, P2, P3)
+    stopifnot(nrow(P) == n)
+  } else {
+    tringle = matrix(c(rho, 0, 1, 0, 1, 1 - rho), nrow = 3, byrow = T)
+    P = runifTringle(tringle, n)
+  }
+  P
+}
+
+#' @title generate tringle distribution in [(0,0), (1,0), (1,1)]
+#' @param rho, control the sample space
+#' @param n, number of random variables
+tringle_distribution <- function(rho, n) {
+  if (rho < 0) {
+    rho = 1 + rho
+    tringle1 = matrix(c(0, 0, 1, 1 - rho, 1, 1), nrow = 3, byrow = T)
+    tringle2 = matrix(c(0, 0, rho, 0, 1, 1 - rho), nrow = 3, byrow = T)
+    P1 = runifTringle(tringle1, floor(n / (1 + 1 - rho)))
+    P2 = runifTringle(tringle2, n - floor(n / (1 + 1 - rho)))
+    P = rbind(P1, P2)
+    stopifnot(nrow(P) == n)
+  } else {
+    tringle = matrix(c(rho, 0, 1, 0, 1, 1 - rho), nrow = 3, byrow = T)
+    P = runifTringle(tringle, n)
+  }
+  P
+  #c(apply(P, 2, mean), apply(P, 2, var))
+}
+
+
+# a new kind of matrix multiplication?
+# it differ from matrix multiplication based on inner products
+# and Kronecker multiplication based on outer products.
+# it expand two matrix A(m*n) and B(n*p) to new C(m*n*p)
+# A = matrix(c(0,1,1,0,1,0,0,1,1,0,0,0,0,1,0,0), nrow = 4, byrow = T)
+multiply.matrix <- function(A, B) {
+  stopifnot(dim(A)[2] == dim(B)[1])
+  m = dim(A)[1]
+  n = dim(A)[2]
+  p = dim(B)[2]
+  C = array(0, dim = c(m, n, p))
+  for (i in 1:m) {
+    for (j in 1:p) {
+      for (k in 1:n) {
+        C[i, k, j] = A[i, k] * B[k, j]
+      }
+    }
+  }
+  C
+}
+
+#' @title get abundance sum of length 2 interactions
+#' @param C, arrary(i,j,k), i-->j-->k interactions
+#' @param N, species abundances
+abund.length2 <- function(C, N) {
+  apply(C, c(1,2), function(x) sum(x * N))
+}
+
+# repeat a vector [n] times to create a matrix
+rep.row<-function(x,n){
+  matrix(rep(x,each=n),nrow=n)
+}
+rep.col<-function(x,n){
+  matrix(rep(x,each=n), ncol=n, byrow=TRUE)
+}
+
 # http://www.evanmiller.org/bayesian-ab-testing.html#cite1   Probability of one Beta variable is charger than another
 #' @title generate two correlated Beta random variables
 #' @param n, number of samples

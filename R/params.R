@@ -214,6 +214,34 @@ params_cr2_5 <- function(hybrid_graph, coeff) {
   })
 }
 
+params_hs <- function(graph, coeff) {
+  s = dim(graph)[1]  # number of species
+  with(as.list(coeff), {
+    r <- runif2(s, alpha.mu, alpha.sd)  # intrinsic growth rates
+    C <- runif2(s, beta0.mu, beta0.sd)  # self-regulation
+    # interaction strengths are symmetric
+    tmp <- matrix(0, nrow = s, ncol = s)
+    tmp[upper.tri(tmp)] = runif2(s * (s - 1) / 2, gamma.mu, gamma.sd)
+    tmp <- tmp + t(tmp)
+    M = tmp * graph
+    # half-saturation are symmetric
+    tmp <- matrix(0, nrow = s, ncol = s)
+    tmp[upper.tri(tmp)] = runif2(s * (s - 1) / 2, h.mu, h.sd)
+    tmp <- tmp + t(tmp)
+    diag(tmp) <- 1 # a trick to avoid NaN in model(divided by zero)
+    H = tmp # * graph # a trick to avoid NaN in model(divided by zero)
+    # consumer-side and resource-side conversion rates
+    P = polygon_distribution(rho, s * s)
+    G = matrix(P[, 1], ncol = s) * graph
+    E = matrix(P[, 2], ncol = s) * graph
+    # binary adjacency matrix of graph
+    A = graph
+    # all length 2 paths(interactions)
+    A2 = multiply.matrix(A, A)
+    
+    list(r = r, C = C, M = M, H = H, G = G, E = E, A = A, A2 = A2) 
+  })
+}
     
 #' @title triangle distribution of conversion rates for antago- and mutual- interactions
 params_cr2_3 <- function(hybrid_graph, coeff) {

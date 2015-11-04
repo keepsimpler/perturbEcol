@@ -1,3 +1,26 @@
+####################CR Half-Saturation Model##########################
+model_hs <- function(time, init, params, ...) {
+  r = params[[1]]  # intrinsic growth rates
+  C = params[[2]]  # self-regulation
+  M = params[[3]]  # interaction strength
+  H = params[[4]]  # half-saturation
+  G = params[[5]]  # consumer-side conversion rates
+  E = params[[6]]  # resource-side conversion rates
+  A = params[[7]]  # binary interaction (got from [M])
+  A2 = params[[8]] # all length 2 interactions (got from [A])
+  N = init  # (initial) species abundances
+  s = dim(M)[1]  # number of species
+  Ns = rep.row(N, s)  # repeat to create a matrix
+  
+  #A = M
+  #A[A > 0] = 1  # get interaction structure
+  dN <- N * ( r - C * N  # intraspecies self-regulation
+              + rowSums(G * M * Ns / (H + rep.col(A %*% N, s)))
+              - rowSums(E * t(M) * Ns / (t(H) + abund.length2(A2, N)))
+  )
+  list(c(dN))  
+}
+
 #####################Consumer-Resource Model##########################
 model_cr2 <- function(time, init, params, ...) {
   r = params[[1]]  # intrinsic growth rates
