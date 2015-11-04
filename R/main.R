@@ -7,7 +7,7 @@ model_hs <- function(time, init, params, ...) {
   G = params[[5]]  # consumer-side conversion rates
   E = params[[6]]  # resource-side conversion rates
   A = params[[7]]  # binary interaction (got from [M])
-  A2 = params[[8]] # all length 2 interactions (got from [A])
+  #A2 = params[[8]] # all length 2 interactions (got from [A])
   N = init  # (initial) species abundances
   s = dim(M)[1]  # number of species
   Ns = rep.row(N, s)  # repeat to create a matrix
@@ -16,7 +16,7 @@ model_hs <- function(time, init, params, ...) {
   #A[A > 0] = 1  # get interaction structure
   dN <- N * ( r - C * N  # intraspecies self-regulation
               + rowSums(G * M * Ns / (H + rep.col(A %*% N, s)))
-              - rowSums(E * t(M) * Ns / (t(H) + abund.length2(A2, N)))
+              - rowSums(E * t(M) * Ns / (t(H) + abund.length(A, N)))
   )
   list(c(dN))  
 }
@@ -199,7 +199,7 @@ model_lv2_cm <- function(time, init, params, ...) {
 sim_ode_press <- function(model, params, init, times, perturb, perturbNum = 500, isout = FALSE, extinct_threshold = 1e-10, ...) {
   ode.outs = list()
   for(i in 1:perturbNum) {
-    ode.out = ode(init, times, model, params, method = "ode45", atol = 1e-14, rtol = 1e-14) # rootfun = rootfun, method = "lsodar", atol = 1e-10 
+    ode.out = ode(init, times, model, params, method = "ode45", atol = 1e-13, rtol = 1e-13) # rootfun = rootfun, method = "lsodar", atol = 1e-10 
     nstar = as.numeric(ode.out[nrow(ode.out), 2:ncol(ode.out)]) # species biomass at equilibrium
     nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
     species.survived = which(nstar > 0)  # survived species
@@ -236,7 +236,7 @@ rootfun <- function(time, init, params) {
 }
 
 sim_ode <- function(model, params, init, time, extinct_threshold = 1e-10, ...) {
-  out = ode(init, time, model, params, method = "ode45", atol = 1e-14, rtol = 1e-14) # rootfun = rootfun, method = "lsodar", atol = 1e-10
+  out = ode(init, time, model, params, method = "ode45", atol = 1e-13, rtol = 1e-13) # rootfun = rootfun, method = "lsodar", atol = 1e-10
   nstar =  as.numeric(out[nrow(out), 2:ncol(out)]) # species abundances in equilibrium
   nstar[nstar < extinct_threshold] = 0  # species with biomass less than extinct threshold is considered to be extinct
   species.survived = which(nstar > 0)  # survived species

@@ -69,6 +69,18 @@ abund.length2 <- function(C, N) {
   apply(C, c(1,2), function(x) sum(x * N))
 }
 
+abund.length <- function(A, N) {
+  m = dim(A)[1]
+  n = dim(A)[2]
+  N2 = matrix(0, nrow = m, ncol = n)
+  for (i in 1:m) {
+    for (j in 1:n) {
+      if (A[i, j] == 1)
+        N2[i, j] = sum(A[j, ] * N)
+    }
+  }
+  N2
+}
 # repeat a vector [n] times to create a matrix
 rep.row<-function(x,n){
   matrix(rep(x,each=n),nrow=n)

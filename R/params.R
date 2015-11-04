@@ -237,9 +237,9 @@ params_hs <- function(graph, coeff) {
     # binary adjacency matrix of graph
     A = graph
     # all length 2 paths(interactions)
-    A2 = multiply.matrix(A, A)
+    #A2 = multiply.matrix(A, A)
     
-    list(r = r, C = C, M = M, H = H, G = G, E = E, A = A, A2 = A2) 
+    list(r = r, C = C, M = M, H = H, G = G, E = E, A = A) #, A2 = A2
   })
 }
     
