@@ -1,3 +1,17 @@
+#' @title get proportions of competition, antagonism, mutualism interactions accroding to consumer-side and resource-side conversion rates
+#' @param params, model params including all conversion rates
+proportions <- function(params) {
+  G = params$G
+  E = params$E
+  GE = G - E
+  GE[GE > 0] = 1
+  GE[GE < 0] = -2
+  GE = GE + t(GE)
+  pc = sum(GE == -4) / sum(GE != 0)
+  pa = sum(GE == -1) / sum(GE != 0)
+  pm = sum(GE == 2) / sum(GE != 0)
+  c(pc = pc, pa = pa, pm = pm)
+}
 #' @title generate polygon distribution in rectangle [(0,0), (1,1)]
 #' @param rho, control sample subspace in rectangle [(0,0), (1,1)]
 #' @param n, number of random variables
