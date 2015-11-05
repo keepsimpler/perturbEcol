@@ -33,7 +33,7 @@ model_hs_2 <- function(time, init, params, ...) {
 
   dN <- N * ( r - C * N  # intraspecies self-regulation
               + ( (G * M) %*% N ) / (1 + (H * M) %*% N)  # positive part of antagonistic interactions
-              - E * t(M) %*% diag(N) %*% (1 / (1 + (H * M) %*% N))  # negative part of antagonistic interactions
+              - (E * t(M)) %*% diag(N) %*% (1 / (1 + (H * M) %*% N))  # negative part of antagonistic interactions
   )
   list(c(dN))  
 }
