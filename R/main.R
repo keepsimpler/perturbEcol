@@ -20,6 +20,23 @@ model_hs <- function(time, init, params, ...) {
   )
   list(c(dN))  
 }
+####################CR Handling-Time Model##########################
+model_hs_2 <- function(time, init, params, ...) {
+  r = params[[1]]  # intrinsic growth rates
+  C = params[[2]]  # self-regulation
+  M = params[[3]]  # interaction strength
+  H = params[[4]]  # half-saturation
+  G = params[[5]]  # consumer-side conversion rates
+  E = params[[6]]  # resource-side conversion rates
+  N = init  # (initial) species abundances
+  s = dim(M)[1]  # number of species
+
+  dN <- N * ( r - C * N  # intraspecies self-regulation
+              + ( (G * M) %*% N ) / (1 + (H * M) %*% N)  # positive part of antagonistic interactions
+              - E * t(M) %*% diag(N) %*% (1 / (1 + (H * M) %*% N))  # negative part of antagonistic interactions
+  )
+  list(c(dN))  
+}
 
 #####################Consumer-Resource Model##########################
 model_cr2 <- function(time, init, params, ...) {
