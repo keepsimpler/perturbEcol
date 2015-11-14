@@ -1,3 +1,27 @@
+########Explicit Angagonism-Competition-Mutualism Model###################
+model_acm <- function(time, init, params, ...) {
+  r = params[[1]]  # intrinsic growth rates
+  s = params[[2]]  # intra-species competitions
+  M = params[[3]]  # Mutualism interactions
+  AP = params[[4]] # Positive-part of Antagonism interactions
+  AN = params[[5]] # Negative-part of Antagonism interactions
+  C = params[[6]]  # Comptetition interactions
+  H = params[[7]]  # handling-time
+  G = params[[8]]  # conversion rates of winners in antagonism interactions
+  E = params[[9]]  # conversion rates in mutualism interactions
+  N = init  # (initial) species abundances
+  #s = dim(M)[1]  # number of species
+  
+  dN <- N * ( r - s * N  # intraspecies self-regulation
+              + ( (E * M) %*% N ) / (1 + (H * M) %*% N)  # mutualism
+              + ( (G * AP) %*% N ) / (1 + (H * AP) %*% N)  # positive part of antagonism
+              - (t(AP)) %*% diag(N) %*% (1 / (1 + (H * AP) %*% N))  # negative part of antagonism
+              - C %*% N
+  )
+  list(c(dN))  
+}
+
+
 ####################CR Half-Saturation Model##########################
 model_hs <- function(time, init, params, ...) {
   r = params[[1]]  # intrinsic growth rates

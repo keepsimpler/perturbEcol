@@ -118,6 +118,28 @@ setMethod("out<-", "perturbModel",
           }
 )
 
+params_acm <- function(hybrid_graph, coeff) {
+  competitive_graph = hybrid_graph$competitive_graph
+  antago_graph = hybrid_graph$antago_graph
+  mutual_graph = hybrid_graph$mutual_graph
+  n = dim(antago_graph)[1]  # number of species
+  with(as.list(coeff), {
+    r <- runif2(n, alpha.mu, alpha.sd)
+    s <- runif2(n, beta0.mu, beta0.sd)
+    Gamma = matrix(abs(rnorm(n * n, gamma.mu, gamma.sd)), 
+                   nrow = n, ncol = n)
+    M = Gamma * mutual_graph  # mutualism interactions
+    # Positive part of antagonism interactions
+    antago_graph[antago_graph < 0] = 0
+    AP = Gamma * antago_graph
+    C = Gamma * competitive_graph
+    H = matrix(runif2(n * n, h.mu, h.sd), nrow = n, ncol = n)
+    G = matrix(runif2(n * n, g.mu, g.sd), nrow = n, ncol = n)
+    E = matrix(runif2(n * n, e.mu, e.sd), nrow = n, ncol = n)
+    list(r = r, s = s, M = M, AP = AP, AN = 0, C = C, H = H, G = G, E = E)     
+  })
+}
+
 #' @title parameters for consumer-resource model according to the hybrid network and the coefficients
 #' @param hybrid_graph the hybrid interaction topology of communities, which includes three sub-graphs: competition, antagonism and mutualism
 #' @param coeff, a list of coefficients:
