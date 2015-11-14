@@ -365,7 +365,7 @@ rewire_antago_to_mutual <- function(A, M, need.connected = T, ntry = 100) {
 #' @param pm probability of mutualism interactions
 #' @param ... additional arguments transformed to graph generate such as [expower]
 gen_hybrid_network <- function(s, k, type = 'er', pc = 0., pa = 0., pm = 1., ...) {
-  stopifnot(pc >= 0., pa >= 0., pm >= 0., pc + pa + pm == 1)
+  stopifnot(pc >= 0., pa >= 0., pm >= 0., round(pc + pa + pm, 5) == 1)
   G = gen_connected_graph(s, k, type, ...)  # generate a connected graph
   graph = as.matrix(get.adjacency(G))  # transform to matrix form
   # split the graph to three sub-graph - competition, antagonism and mutualism graphs according to the probability of occurance of three different types of interactions
