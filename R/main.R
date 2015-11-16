@@ -15,7 +15,7 @@ model_acm <- function(time, init, params, ...) {
   dN <- N * ( r - s * N  # intraspecies self-regulation
               + ( (E * M) %*% N ) / (1 + (H * M) %*% N)  # mutualism
               + ( (G * AP) %*% N ) / (1 + (H * AP) %*% N)  # positive part of antagonism
-              - (t(AP)) %*% diag(N) %*% (1 / (1 + (H * AP) %*% N))  # negative part of antagonism
+              - (AN) %*% diag(N) %*% (1 / (1 + (H * AP) %*% N))  # negative part of antagonism t(AP)
               - C %*% N
   )
   list(c(dN))  

@@ -118,7 +118,7 @@ setMethod("out<-", "perturbModel",
           }
 )
 
-params_acm <- function(hybrid_graph, coeff) {
+params_acm <- function(hybrid_graph, coeff, antago.symm = TRUE) {
   competitive_graph = hybrid_graph$competitive_graph
   antago_graph = hybrid_graph$antago_graph
   mutual_graph = hybrid_graph$mutual_graph
@@ -132,11 +132,15 @@ params_acm <- function(hybrid_graph, coeff) {
     # Positive part of antagonism interactions
     antago_graph[antago_graph < 0] = 0
     AP = Gamma * antago_graph
+    if (antago.symm == TRUE)
+      AN = t(AP)
+    else
+      AN = Gamma * t(antago_graph)
     C = Gamma * competitive_graph
     H = matrix(runif2(n * n, h.mu, h.sd), nrow = n, ncol = n)
     G = matrix(runif2(n * n, g.mu, g.sd), nrow = n, ncol = n)
     E = matrix(runif2(n * n, e.mu, e.sd), nrow = n, ncol = n)
-    list(r = r, s = s, M = M, AP = AP, AN = 0, C = C, H = H, G = G, E = E)     
+    list(r = r, s = s, M = M, AP = AP, AN = AN, C = C, H = H, G = G, E = E)     
   })
 }
 
