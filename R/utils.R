@@ -1,3 +1,13 @@
+#' @title get covariance matrix of multivariate OU process
+#' @param phi, community matrix
+#' @param C, the covariance matrix of environmental fluctuating
+mou.vars <- function(phi, C) {
+  s = dim(phi)[1]
+  I = diag(1, s)
+  - matrix(solve(kronecker(I, phi) + kronecker(phi, I)) %*% as.vector(C), nrow = s, ncol = s)
+}
+
+
 #' @title get proportions of competition, antagonism, mutualism interactions accroding to consumer-side and resource-side conversion rates
 #' @param params, model params including all conversion rates
 proportions <- function(params) {
